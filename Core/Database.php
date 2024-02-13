@@ -1,5 +1,9 @@
 <?php
-// Connect to the database,and execute the query
+
+namespace Core;
+
+use PDO;
+
 class Database
 {
   public $connection;

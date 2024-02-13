@@ -12,6 +12,7 @@
             </li>
         <?php endforeach ?>
 
+
         <p class="mt-6">
             <a href="/notes/create" class="text-blue-900 hover:underline">Create Note</a>
         </p>
