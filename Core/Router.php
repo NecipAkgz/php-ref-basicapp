@@ -2,6 +2,10 @@
 
 namespace Core;
 
+use Core\Middleware\Auth;
+use Core\Middleware\Guest;
+use Core\Middleware\Middleware;
+
 class Router
 {
     protected $routes = [];
@@ -9,45 +13,65 @@ class Router
     public function add($method, $uri, $controller)
     {
         $this->routes[] = [
-            'uri'        => $uri,
+            'uri' => $uri,
             'controller' => $controller,
-            'method'     => $method
+            'method' => $method,
+            'middleware' => null
         ];
+
+        return $this;
     }
 
     public function get($uri, $controller)
     {
-        $this->add('GET', $uri, $controller);
+        return $this->add('GET', $uri, $controller);
     }
 
     public function post($uri, $controller)
     {
-        $this->add('POST', $uri, $controller);
+        return $this->add('POST', $uri, $controller);
     }
 
     public function delete($uri, $controller)
     {
-        $this->add('DELETE', $uri, $controller);
+        return $this->add('DELETE', $uri, $controller);
     }
 
     public function patch($uri, $controller)
     {
-        $this->add('PATCH', $uri, $controller);
+        return $this->add('PATCH', $uri, $controller);
     }
 
     public function put($uri, $controller)
     {
-        $this->add('PUT', $uri, $controller);
+        return $this->add('PUT', $uri, $controller);
     }
 
+    public function only($key)
+    {
+        $this->routes[array_key_last($this->routes)]['middleware'] = $key;
+    }
+
+    /**
+     * Find and execute the controller for the specified URI and HTTP method
+     *
+     * @param string $uri The URI to route
+     * @param string $method The HTTP method
+     * @return mixed
+     */
     public function route($uri, $method)
     {
+        // Loop through the routes to find a match for the specified URI and HTTP method
         foreach ($this->routes as $route) {
             if ($route['uri'] === $uri && $route['method'] === strtoupper($method)) {
+                // apply middleware
+                Middleware::resolve($route['middleware']);
+                // If a match is found, execute the controller
                 return require base_path($route['controller']);
             }
         }
 
+        // If no match is found, abort the route
         $this->abort();
     }
 
